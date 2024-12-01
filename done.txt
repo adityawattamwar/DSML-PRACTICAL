@@ -1,0 +1,853 @@
+ASS 1-
+import pandas as pd
+
+# Load the Titanic dataset
+file_path = "D://DSML PRACTICAL//Datasets//Titanic.csv"
+df = pd.read_csv(file_path)
+
+# Read data and display the first few rows
+print("First few rows of the dataset:")
+df.head()
+
+# Indexing and selecting data (e.g., selecting rows where Age > 30)
+selected_data = df[df['Age'] > 30]
+print("\nRows where Age > 30:")
+print(selected_data)
+
+df.iloc[1:4,:]
+
+# Sorting data by Fare
+sorted_data = df.sort_values(by='Fare', ascending=False)
+print("\nTop rows sorted by Fare (descending):")
+print(sorted_data.head())
+
+# Describing attributes of data
+description = df.describe()
+print("\nDescription of dataset attributes:")
+print(description)
+
+# Checking data types of each column
+data_types = df.dtypes
+print("\nData types of each column:")
+print(data_types)
+
+# deleting
+df.drop('Fare',axis=1,inplace=True)
+
+
+
+
+2) ASS 2
+
+import pandas as pd
+
+file_path = "D://DSML PRACTICAL//Datasets//Telecom Churn.csv"
+
+df = pd.read_csv(file_path)
+
+numeric_df = df.select_dtypes(include=['number'])
+
+min_values = numeric_df.min()
+max_values = numeric_df.max()
+mean_values = numeric_df.mean()
+range_values = max_values - min_values
+std_dev = numeric_df.std()
+variance = numeric_df.var()
+percentiles = numeric_df.quantile([0.25, 0.5, 0.75])
+
+print("Minimum values:")
+print(min_values)
+
+print("\nMaximum values:")
+print(max_values)
+
+print("\nMean values:")
+print(mean_values)
+
+print("\nRange values:")
+print(range_values)
+
+print("\nStandard deviation:")
+print(std_dev)
+
+print("\nVariance:")
+print(variance)
+
+print("\nPercentiles (25%, 50%, 75%):")
+print(percentiles)
+
+
+
+
+3) ASS 3
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Load the dataset
+file_path = "D://DSML PRACTICAL//Datasets//House Data.csv"
+df = pd.read_csv(file_path)
+
+# Step 1: Clean the "price" column by removing non-numeric characters and converting to float
+# df=df.loc[df["price"]!='34550000arrow_downward%3']
+df["price"] = df["price"].str.replace("TL", "").str.replace(",", "").str.extract(r'(\d+)')[0].astype(float)
+unique_values = df["price"].unique()
+
+
+
+# Step 2: Clean the "GrossSquareMeters" column by removing "m2" and converting to float
+df["GrossSquareMeters"] = df["GrossSquareMeters"].str.replace(" m2", "").astype(float)
+
+# Step 3: Convert "BuildingAge" into numeric values
+df["BuildingAge"] = df["BuildingAge"].replace({"21 Ve Üzeri": 21, "5-10": 7.5, "11-15": 13, "0 (Yeni)": 0,"16-20": 18, "20 Ve Üzeri":20}).astype(float)
+
+# Handle missing values (fill with median for numeric columns)
+df.fillna(df.mean(numeric_only=True), inplace=True)
+
+# Step 4: Compute Statistical Measures (Standard Deviation, Variance, Percentiles)
+stats = {
+    "Standard Deviation": df.std(numeric_only=True),
+    "Variance": df.var(numeric_only=True),
+    "25th Percentile": df.quantile(0.25, numeric_only=True),
+    "50th Percentile (Median)": df.median(numeric_only=True),
+    "75th Percentile": df.quantile(0.75, numeric_only=True),
+}
+
+stats_df = pd.DataFrame(stats)
+print("Summary Statistics:\n", stats_df)
+
+# Step 5: Create Histograms for numeric columns
+for column in df.select_dtypes(include=[float, int]).columns:
+    plt.figure()
+    sns.histplot(df[column], kde=True, bins=10, color="skyblue")
+    plt.title(f"Distribution of {column}")
+    plt.xlabel(column)
+    plt.ylabel("Frequency")
+    plt.show()
+
+
+
+
+4)ASS 4
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+df = pd.read_csv('D://DSML PRACTICAL//Datasets//Lipstick.csv')
+
+
+df
+
+x=['Age','Income','Gender','Ms']
+y='Buys'
+
+gindict=dict()
+
+def calc_entropy(yes,no,tc):
+    return 1-((yes/tc)**2+(no/tc)**2)
+
+sum=0
+total=len(df)
+for abc in x:
+    sum=0
+    unique_values=df[abc].unique()
+    for gh in unique_values:
+        total_counts=len(df[df[abc]==gh])
+        yes_count=len(df[(df[abc]==gh) & (df['Buys']=='Yes')])
+        no_count=len(df[(df[abc]==gh) & (df['Buys']=='No')])
+        sum+=(total_counts/total)*calc_entropy(yes_count,no_count,total_counts)
+    gindict[abc]=sum
+    
+    
+print(gindict)
+
+from sklearn.preprocessing import LabelEncoder
+
+le= LabelEncoder()
+
+encoders={}
+
+for abc in df.columns:
+    le=LabelEncoder()
+    df[abc]=le.fit_transform(df[abc])
+    encoders[abc]=le
+
+df
+
+from sklearn.tree import DecisionTreeRegressor,plot_tree,DecisionTreeClassifier
+# from sklearn.preprocessing import train_test_split
+
+dt=DecisionTreeClassifier()
+
+dt
+
+a=df[['Age','Income','Gender','Ms']]
+b=df['Buys']
+
+dt.fit(a,b)
+
+columns = df.columns.to_list()
+plot_tree(dt, feature_names=['Age','Income','Gender','Ms'], 
+          class_names=['Yes', 'No'], filled=True)
+plt.show()
+
+input_data = {
+    'Age': ['>35'],
+    'Income': ['Medium'],
+    'Gender': ['Female'],
+    'Ms': ['Married']
+}
+input_data = pd.DataFrame(input_data)
+for column in x:
+    le = encoders[column]
+    input_data[column] = le.transform(input_data[column])
+abc=dt.predict(input_data)
+abc = abc.astype(int) 
+print(encoders['Buys'].inverse_transform(abc))
+
+
+
+
+
+
+5)ASS 5,6,7,8
+
+import pandas as pd
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.preprocessing import LabelEncoder
+
+# Step 1: Create the dataset
+data = {
+    "Id": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+    "Age": ["<21", "<21", "21-35", ">35", ">35", ">35", "21-35", "<21", "<21", ">35", "<21", "21-35", "21-35", ">35"],
+    "Income": ["High", "High", "High", "Medium", "Low", "Low", "Low", "Medium", "Low", "Medium", "Medium", "Medium", "High", "Medium"],
+    "Gender": ["Male", "Male", "Male", "Male", "Female", "Female", "Female", "Male", "Female", "Female", "Female", "Male", "Female", "Male"],
+    "Ms": ["Single", "Married", "Single", "Single", "Single", "Married", "Married", "Single", "Married", "Single", "Married", "Married", "Single", "Married"],
+    "Buys": ["No", "No", "Yes", "Yes", "Yes", "No", "Yes", "No", "Yes", "Yes", "Yes", "Yes", "Yes", "No"]
+}
+df = pd.DataFrame(data)
+
+# Step 2: Encode categorical variables using LabelEncoder
+le = LabelEncoder()
+for col in ["Age", "Income", "Gender", "Ms", "Buys"]:
+    df[col] = le.fit_transform(df[col])
+
+
+df
+
+
+# Step 3: Split the dataset into features (X) and target (y)
+X = df[["Age", "Income", "Gender", "Ms"]]
+y = df["Buys"]
+
+# Step 4: Train the Decision Tree Classifier
+clf = DecisionTreeClassifier(criterion="entropy", random_state=42)
+clf.fit(X, y)
+
+# Step 5: Test data (simplified version)
+test_data = [[0, 2, 1, 1]]  # [Age < 21, Income = Low, Gender = Female, Marital Status = Married]
+
+# Step 6: Predict the outcome for the test data
+prediction = clf.predict(test_data)
+print("Prediction for the test data: ", "Yes" if prediction[0] == 1 else "No")
+
+
+
+
+
+6)ASS 9,10
+
+import math
+
+points = [
+    (0.1, 0.6), (0.15, 0.71), (0.08, 0.9), (0.16, 0.85), 
+    (0.2, 0.3), (0.25, 0.5), (0.24, 0.1), (0.3, 0.2)
+]
+
+points
+
+def euclidean(p1,p2):
+    return math.sqrt((p1[0]-p2[0])**2+(p1[1]-p2[1])**2)
+
+print(euclidean((4,5),(4,5)))
+
+def calculate(cluster):
+    x=0
+    y=0
+    for abc in cluster:
+        x+=abc[0]
+        y+=abc[1]
+        
+    return (x/len(cluster),y/len(cluster))
+calculate(((1,2),(4,2)))
+    
+
+# perform actual iterations
+converged=False
+m1=(0.1,0.6)
+m2=(0.3,0.2)
+while converged==False:
+    cluster1=[]
+    cluster2=[]
+    for p in points:
+#         print(p)
+        d1=euclidean(p,m1)
+        d2=euclidean(p,m2)
+#         print(d1)
+#         print(d2)
+        if(d1<d2):
+            cluster1.append(p)
+        else:
+            cluster2.append(p)
+    print(cluster1)
+    print(cluster2)
+    newm1=calculate(cluster1)
+    newm2=calculate(cluster2)
+    if(m1==newm1 and m2==newm2):
+        converged=True
+    else:
+        m1=newm1
+        m2=newm2
+        
+print("Updated centroid m1 (Cluster 1):", m1)
+print("Updated centroid m2 (Cluster 2):", m2)
+
+
+
+
+7)ASS 11
+
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Load the Iris dataset
+file_path = "D://DSML PRACTICAL//Datasets//Iris.csv"
+df = pd.read_csv(file_path)
+
+# 1. List down the features and their types
+feature_types = df.dtypes
+print("Features and their data types:")
+print(feature_types)
+
+# Separate the numeric and nominal features
+numeric_features = df.select_dtypes(include=['number'])
+nominal_features = df.select_dtypes(exclude=['number'])
+
+print("\nNumeric features:")
+print(numeric_features)
+
+print("\nNominal features:")
+print(nominal_features)
+
+# # 2. Create a histogram for each feature
+for column in numeric_features:
+    plt.figure(figsize=(8, 6))
+    sns.histplot(df[column], kde=True, bins=20, color='skyblue', edgecolor='black')
+    plt.title(f'Histogram of {column}')
+    plt.xlabel(column)
+    plt.ylabel('Frequency')
+    plt.show()
+
+
+
+8) ASS 12
+
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Load the Iris dataset
+file_path = "D://DSML PRACTICAL//Datasets//Iris.csv"
+df = pd.read_csv(file_path)
+
+# 1. Create box plots for each feature
+for column in df.columns[:-1]:  # Exclude the 'species' column (categorical)
+    plt.figure(figsize=(8, 6))
+    sns.boxplot(data=df[column], color='skyblue')
+    plt.title(f'Box Plot of {column}')
+    plt.xlabel(column)
+    plt.show()
+
+# 2. Identify and discuss distributions and identify outliers
+# For each numeric column, calculate the IQR and identify outliers
+for column in df.columns[:-1]:  # Exclude 'species'
+    Q1 = df[column].quantile(0.25)
+    Q3 = df[column].quantile(0.75)
+    IQR = Q3 - Q1
+    print(IQR)
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+    
+    # Identify outliers
+    outliers = df[(df[column] < lower_bound) | (df[column] > upper_bound)]
+    
+    print(f"\nOutliers for {column}:")
+    print(outliers)
+    print(f"Lower Bound: {lower_bound}, Upper Bound: {upper_bound}")
+    print(f"Outliers count: {len(outliers)}\n")
+
+
+
+
+9)ASS 13
+
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Load the dataset
+file_path = "D://DSML PRACTICAL//Datasets//Covid Vaccine Statewise.csv"
+df = pd.read_csv(file_path)
+
+# a. Describe the dataset
+description = df.describe(include='all')
+print("Dataset Description:\n", description)
+
+# Visualizing the summary with a heatmap for quick insights (correlation matrix)
+# Select only numeric columns for the heatmap
+numeric_df = df.select_dtypes(include=['number'])
+
+plt.figure(figsize=(8, 6))
+sns.heatmap(numeric_df.corr(), annot=True, cmap='coolwarm', fmt=".2f", linewidths=0.5)
+plt.title("Correlation Heatmap of Features")
+plt.show()
+
+# b. Number of persons state-wise vaccinated for the first dose
+first_dose = df.groupby('State')['First Dose Administered'].sum().sort_values(ascending=False)
+
+# Using sns.barplot for the first dose data visualization
+plt.figure(figsize=(10, 6))
+sns.barplot(x=first_dose.index, y=first_dose.values, palette='Blues_d')
+plt.title("Number of People Vaccinated with First Dose (State-wise)")
+plt.xlabel("State/Union Territory")
+plt.ylabel("First Dose Administered")
+plt.xticks(rotation=90)  # Rotate state names for better readability
+plt.show()
+
+# c. Number of persons state-wise vaccinated for the second dose
+second_dose = df.groupby('State')['Second Dose Administered'].sum().sort_values(ascending=False)
+
+# Using sns.barplot for the second dose data visualization
+plt.figure(figsize=(10, 6))
+sns.barplot(x=second_dose.index, y=second_dose.values, palette='Reds_d')
+plt.title("Number of People Vaccinated with Second Dose (State-wise)")
+plt.xlabel("State/Union Territory")
+plt.ylabel("Second Dose Administered")
+plt.xticks(rotation=90)  # Rotate state names for better readability
+plt.show()
+
+# Optional: Print a sample of the first few rows to ensure clarity of data
+print("\nSample of the dataset:")
+print(df.head())
+
+
+10)ASS 14
+
+import pandas as pd
+
+# Load the dataset
+file_path = "D://DSML PRACTICAL//Datasets//Covid Vaccine Statewise.csv"
+df = pd.read_csv(file_path)
+
+# A. Describe the dataset
+description = df.describe(include='all')
+print("Dataset Description:\n", description)
+
+# B. Number of Males vaccinated
+# Assuming 'Male (Doses Administered)' column contains male vaccination data
+males_vaccinated = df['First Dose Administered'].sum()
+print(f"\nNumber of males vaccinated: {males_vaccinated}")
+
+# C. Number of Females vaccinated
+# Assuming 'Female (Doses Administered)' column contains female vaccination data
+females_vaccinated = df['Female (Doses Administered)'].sum()
+print(f"\nNumber of females vaccinated: {females_vaccinated}")
+
+
+
+11) ASS 15
+   
+import seaborn as sns
+import matplotlib.pyplot as plt
+import pandas as pd
+# Set a general style for the plots
+sns.set(style="whitegrid")
+df=pd.read_csv("D://DSML PRACTICAL//Datasets//Titanic.csv")
+
+df.head()
+numeric_df=df.select_dtypes(include=['number'])
+
+sns.heatmap(numeric_df.corr(),annot=True)
+
+df.describe()
+
+temp_df = df[(df['Sex'] == 'male') & (df['Survived'] == 1)]
+len(temp_df)
+
+
+plt.figure(figsize=(8, 6))
+sns.histplot(df['Age'].dropna())
+plt.title('Distribution of Age')
+plt.xlabel('Age')
+plt.ylabel('Frequency')
+plt.show()
+
+# 2. Visualizing the survival rate based on Sex
+plt.figure(figsize=(8, 6))
+sns.barplot(x='Sex', y='Survived', data=df)
+plt.title('Survival Rate Based on Gender')
+plt.xlabel('Gender')
+
+
+
+plt.ylabel('Survival Rate')
+plt.show()
+
+# 3. Visualizing the survival rate based on Passenger Class
+plt.figure(figsize=(8, 6))
+sns.barplot(x='Pclass', y='Survived', data=df, palette='Blues')
+plt.title('Survival Rate Based on Passenger Class')
+plt.xlabel('Passenger Class')
+plt.ylabel('Survival Rate')
+plt.show()
+
+# 4. Correlation Heatmap for Numeric Features
+numeric_df = df.select_dtypes(include=['number'])  # Only numeric columns
+plt.figure(figsize=(8, 6))
+sns.heatmap(numeric_df.corr(), annot=True, cmap='coolwarm', fmt=".2f", linewidths=0.5)
+plt.title('Correlation Heatmap of Numeric Features')
+plt.show()
+
+# 5. Pairplot to see pairwise relationships between features
+sns.pairplot(df[['Age', 'Fare', 'Pclass', 'Survived']].dropna(), hue='Survived', palette='coolwarm')
+plt.show()
+
+
+
+Here are some conclusions we can draw from the Titanic dataset based on the visualizations and analysis:
+
+### 1. **Survival by Gender**:
+   - **Observation**: Females had a significantly higher survival rate compared to males.
+   - **Conclusion**: Women were prioritized during the evacuation, aligning with the "women and children first" policy often followed in maritime disasters.
+
+### 2. **Survival by Passenger Class**:
+   - **Observation**: Passengers in first class had the highest survival rate, followed by second class, with third class passengers having the lowest survival rate.
+   - **Conclusion**: Wealth and access to resources likely played a role in survival, as first-class passengers had better access to lifeboats.
+
+### 3. **Fare Distribution**:
+   - **Observation**: Most passengers paid lower fares, with a small proportion paying significantly higher fares.
+   - **Conclusion**: The dataset reflects a socioeconomic divide, with only a few wealthy individuals aboard. Higher fare payers likely correspond to first-class passengers.
+
+### 4. **Age Distribution by Survival Status**:
+   - **Observation**: Survivors included individuals from a broader age range, but there was a notable concentration of younger survivors.
+   - **Conclusion**: Younger passengers and children may have been given priority during rescue operations.
+
+### 5. **Missing Values in `Age` and `Cabin`**:
+   - **Observation**: The `Age` column has missing values, and the `Cabin` column is largely incomplete.
+   - **Conclusion**: Missing data for `Cabin` suggests incomplete documentation of passenger accommodations, possibly reflecting chaos during the event. Missing ages might need imputation for deeper analysis.
+
+### General Insight:
+The analysis reveals the influence of gender, class, and age on survival rates. These factors highlight societal priorities during crises and underscore the inequities present in such life-and-death situations.
+
+
+
+
+
+12) ASS 16
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Load the Titanic dataset
+df = pd.read_csv('titanic.csv')
+
+# Plotting a histogram for the 'Fare' column to check the distribution
+plt.figure(figsize=(10,6))
+sns.histplot(df['Fare'], kde=True, bins=30, color='skyblue')
+
+# Adding titles and labels for better readability
+plt.title('Distribution of Ticket Fare on Titanic', fontsize=16)
+plt.xlabel('Fare', fontsize=12)
+plt.ylabel('Frequency', fontsize=12)
+
+# Show the plot
+plt.show()
+
+
+
+13)ASS 18
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Load the dataset
+file_path = "D://DSML PRACTICAL//Datasets//House Data.csv"
+df = pd.read_csv(file_path)
+
+# Step 1: Clean the "price" column by removing non-numeric characters and converting to float
+# df=df.loc[df["price"]!='34550000arrow_downward%3']
+df["price"] = df["price"].str.replace("TL", "").str.replace(",", "").str.extract(r'(\d+)')[0].astype(float)
+unique_values = df["price"].unique()
+
+
+
+# Step 2: Clean the "GrossSquareMeters" column by removing "m2" and converting to float
+df["GrossSquareMeters"] = df["GrossSquareMeters"].str.replace(" m2", "").astype(float)
+
+# Step 3: Convert "BuildingAge" into numeric values
+df["BuildingAge"] = df["BuildingAge"].replace({"21 Ve Üzeri": 21, "5-10": 7.5, "11-15": 13, "0 (Yeni)": 0,"16-20": 18, "20 Ve Üzeri":20}).astype(float)
+
+# Handle missing values (fill with median for numeric columns)
+df.fillna(df.mean(numeric_only=True), inplace=True)
+
+df.columns
+
+summary_stats = df.groupby('BuildingAge')['price'].describe()
+
+summary_stats
+
+
+14)ASS 19
+
+
+import pandas as pd
+
+# Load the dataset
+file_path = "D://DSML PRACTICAL//Datasets//iris.csv"  # Update the file path if needed
+df = pd.read_csv(file_path)
+
+# # Filter data for the species of interest
+# species_of_interest = ['Iris-setosa', 'Iris-versicolor', 'Iris-virginica']
+# filtered_df = df[df['species'].isin(species_of_interest)]
+
+# # Group by 'species' and compute summary statistics for the numeric columns using describe()
+summary_stats = df.groupby('species').describe()
+print(summary_stats)
+# # Display the summary statistics
+# print("Summary Statistics for the Species 'Iris-setosa', 'Iris-versicolor', and 'Iris-virginica':")
+summary_stats['sepal_length'].mean()
+summary_stats['sepal_length'].min()
+summary_stats['sepal_length'].max()
+
+
+
+15)ASS 20,21
+
+import random
+import math
+from sklearn.datasets import load_iris
+
+# Step 1: Load the Iris dataset
+iris = load_iris()
+points = iris.data.tolist()
+
+# points
+random.seed(42)
+initial_indices = random.sample(range(len(points)), 3)
+
+initial_indices
+
+centroids = (points[i] for i in initial_indices)
+
+centroids
+m1=centroids[0]
+m2=centroids[1]
+m3=centroids[2]
+
+
+def calculate_centroids(cluster):
+    a,b,c,d=0,0,0,0
+    for gh in cluster:
+        a+=gh[0]
+        b+=gh[1]
+        c+=gh[2]
+        d+=gh[3]
+    return [a/len(cluster),b/len(cluster),c/len(cluster),d/len(cluster)]
+
+def calculate_distance(p1,m1):
+    return math.sqrt((p1[0]-m1[0])**2+(p1[1]-m1[1])**2+(p1[2]-m1[2])**2+(p1[3]-m1[3])**2)
+
+m1=centroids[0]
+m2=centroids[1]
+m3=centroids[2]
+m3
+i=0
+cluster1=[]
+cluster2=[]
+cluster3=[]
+while i<10:
+    for p in points:
+        d1=calculate_distance(p,m1)
+        d2=calculate_distance(p,m2)
+        d3=calculate_distance(p,m3)
+        if(d1<d2 and d1<d3):
+            cluster1.append(p)
+        elif(d2<d1 and d2<d3):
+            cluster2.append(p)
+        elif(d3<d1 and d3<d2):
+            cluster3.append(p)
+    c1=calculate_centroids(cluster1)
+    c2=calculate_centroids(cluster2)
+    c3=calculate_centroids(cluster3)
+    if(m1==c1 and m2==c2 and m3==c3):
+        break
+    else:
+        m1=c1
+        m2=c2
+        m3=c3
+    i+=1
+    
+print(m1)
+print(m2)
+print(m3)
+
+
+
+16)ASS 23
+import pandas as pd
+%pip install openpyxl
+
+df= pd.read_excel("D://DSML PRACTICAL//Datasets//Age Table.xlsx")
+import math
+import numpy as np
+
+df
+
+yes_count=len(df[df['Class']=='Yes'])
+
+yes_count
+
+no_count=len(df)-yes_count
+
+total=no_count+yes_count
+
+def calc_entropy(yes,no,total):
+    if yes == 0 or no == 0:
+        return 0  # If either count is 0, the entropy contribution is 0
+    return (yes/total*np.log2(yes/total)+no/total*np.log2(no/total))*-1
+
+df["Age"] = df["Age"].str.strip()
+
+unique_values=df['Age'].unique()
+
+unique_values
+
+total_entropy=calc_entropy(yes_count,no_count,yes_count+no_count)
+total_entropy
+
+sum=0
+for col in unique_values:
+    temp_df=df[df['Age']==col]
+    y=len(temp_df[temp_df['Class']=='Yes'])
+    n=len(temp_df[temp_df['Class']=='No'])
+    sum+=((y+n)/total*(calc_entropy(y,n,y+n)))
+
+print(total_entropy-sum)
+
+
+
+
+17)ASS 24
+
+import pandas as pd
+
+# Loading the sample data into a pandas DataFrame (assuming it's in CSV format).
+# You can adjust the file path or load the data as needed.
+data = pd.read_csv('sample_data.csv')
+
+# 1. Counting unique values of each column
+unique_counts = data.nunique()
+
+# 2. Identifying the format of each column (data types)
+data_types = data.dtypes
+
+# 3. Converting variable data types (e.g., from long to short, vice versa)
+# Example of changing data type from float to int
+data['Yearly Amount Spent'] = data['Yearly Amount Spent'].astype(int)
+
+# 4. Identifying missing values
+missing_values = data.isnull().sum()
+
+# 5. Filling in missing values
+# For numerical columns, we can use the mean or median to fill the missing values.
+data['Avg. Session Length'].fillna(data['Avg. Session Length'].mean(), inplace=True)
+data['Time on App'].fillna(data['Time on App'].median(), inplace=True)
+
+# Showing the results
+print("Unique values in each column:\n", unique_counts)
+print("\nData types of each column:\n", data_types)
+print("\nMissing values in each column:\n", missing_values)
+
+# Print the dataframe to view filled missing values
+print("\nData with filled missing values:\n", data.head())
+
+
+
+
+
+18)ASS 25
+
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder, MinMaxScaler
+import numpy as np
+
+# Load the dataset
+file_path = "D://DSML PRACTICAL//Datasets//Ecommerce Customers.csv"  # Replace with your actual file path
+data = pd.read_csv(file_path)
+
+# Step 1: Inspect the data
+print("First few rows of the dataset:")
+print(data.head())
+
+# Step 2: Handle missing values (filling with mean for numeric columns)
+numeric_cols = data.select_dtypes(include=['number']).columns
+non_numeric_cols = data.select_dtypes(exclude=['number']).columns
+
+# Step 3: Fill missing values for numeric columns with mean
+data[numeric_cols] = data[numeric_cols].fillna(data[numeric_cols].mean())
+
+# Step 4: Fill missing values for non-numeric columns with mode or other placeholder (e.g., empty string)
+for col in non_numeric_cols:
+    data[col] = data[col].fillna(data[col].mode()[0])  # Filling with mode, or use '' for empty string
+
+
+# Step 5: Label Encoding for categorical columns (e.g., 'color')
+label_encoder = LabelEncoder()
+
+# Loop through all columns to label encode categorical variables
+for column in data.select_dtypes(include=['object']).columns:
+    data[column] = label_encoder.fit_transform(data[column])
+
+# Step 6: Remove Outliers Using IQR Method (0.25 and 0.75 quantiles)
+numeric_columns = data.select_dtypes(include=['float64', 'int64']).columns
+
+for col in numeric_columns:
+    # Calculate the first (Q1) and third (Q3) quartiles
+    Q1 = data[col].quantile(0.25)
+    Q3 = data[col].quantile(0.75)
+    
+    # Calculate IQR
+    IQR = Q3 - Q1
+    
+    # Define the lower and upper bounds
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+    
+    # Filter out rows where the values are outside the bounds
+    data = data[(data[col] >= lower_bound) & (data[col] <= upper_bound)]
+
+# Step 7: Scaling using Min-Max Scaler (normalizing data)
+scaler = MinMaxScaler()
+
+# Apply scaling to all numeric columns 
+data[numeric_columns] = scaler.fit_transform(data[numeric_columns])
+
+# Step 8: Save the cleaned, encoded, scaled, and outlier-removed data
+data.to_csv("Cleaned_Encoded_Scaled_NoOutliers_IQR.csv", index=False)
+
+print("\nData cleaned, label encoded, outliers removed using IQR method, scaled, and saved.")
